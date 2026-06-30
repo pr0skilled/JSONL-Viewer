@@ -1,0 +1,54 @@
+<idea-plugin>
+    <id>io.jsonlviewer</id>
+    <name>JSONL Viewer</name>
+    <vendor>JSONL Viewer</vendor>
+    <description><![CDATA[
+        <p>A fast viewer for <b>JSON Lines</b> files (<code>.jsonl</code> / <code>.ndjson</code>),
+        built for files that are far too large for the normal editor.</p>
+        <p>Opening a <code>.jsonl</code> file adds a <b>Records</b> tab that shows the file as a
+        virtualized, scrollable list of one-line record previews. Selecting a record pretty-prints
+        it below with JSON syntax highlighting and independently foldable nested objects and arrays.</p>
+        <ul>
+            <li><b>Handles huge files</b> &mdash; the file is streamed and indexed by record
+                offset; it is never loaded into the editor's document or PSI, so
+                multi-hundred-megabyte files open instantly without hitting the IDE's size limits.</li>
+            <li><b>On-demand pretty-printing</b> &mdash; each record is formatted only when selected;
+                nested structures fold independently.</li>
+            <li><b>Full-text search</b> &mdash; search across the entire file; the list filters to
+                the matching records with the match highlighted.</li>
+            <li><b>Read-only</b> &mdash; never modifies your files; the raw text stays available on a
+                second tab.</li>
+        </ul>
+        <p>Works in any IntelliJ-based IDE (IntelliJ IDEA, Rider, PyCharm, and others).</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <ul>
+            <li><b>1.0.0</b> &mdash; Initial release: streaming <b>Records</b> viewer for
+                .jsonl / .ndjson with a virtualized record list, on-demand pretty-printing with
+                nested folding, and full-text search.</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.json</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileEditorProvider implementation="io.jsonlviewer.JsonlRecordsEditorProvider"/>
+    </extensions>
+
+    <actions>
+        <!-- Right-click context menu of the record detail viewer (wired via
+             EditorEx.setContextMenuGroupId); not added to any global menu. -->
+        <group id="io.jsonlviewer.RecordViewerPopup">
+            <action id="io.jsonlviewer.ExpandAllRecordFolds"
+                    class="io.jsonlviewer.ExpandAllRecordFoldsAction"
+                    text="Expand All"
+                    description="Expand all nested objects and arrays in this record"/>
+            <action id="io.jsonlviewer.CollapseAllRecordFolds"
+                    class="io.jsonlviewer.CollapseAllRecordFoldsAction"
+                    text="Collapse All"
+                    description="Collapse all nested objects and arrays in this record"/>
+        </group>
+    </actions>
+</idea-plugin>

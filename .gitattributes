@@ -1,0 +1,18 @@
+# Normalize line endings: let Git decide text vs binary, check out native EOL.
+* text=auto
+
+# Shell wrapper must stay LF; Windows wrapper must stay CRLF.
+gradlew      text eol=lf
+*.sh         text eol=lf
+gradlew.bat  text eol=crlf
+*.bat        text eol=crlf
+
+# Kotlin / Gradle sources are text.
+*.kt    text
+*.kts   text
+*.xml   text
+*.md    text
+
+# Binary assets — never touch EOL.
+*.jar   binary
+*.jsonl text

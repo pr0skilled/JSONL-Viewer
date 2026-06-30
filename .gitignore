@@ -1,0 +1,21 @@
+# Build output
+build/
+out/
+
+# Gradle
+.gradle/
+
+# IntelliJ Platform plugin tooling
+.intellijPlatform/
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Internal planning notes — design docs, specs, handoffs.
+# Kept on disk for the author, never published.
+docs/

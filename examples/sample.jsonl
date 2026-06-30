@@ -1,0 +1,5 @@
+{"id": 1, "name": "Alice", "email": "alice@example.com", "active": true, "roles": ["admin", "editor"], "meta": {"created": "2026-01-15", "lastLogin": "2026-06-28", "loginCount": 142}}
+{"id": 2, "name": "Bob", "email": "bob@example.com", "active": false, "roles": ["viewer"], "meta": {"created": "2026-03-02", "lastLogin": "2026-05-10", "loginCount": 7}}
+{"id": 3, "name": "Carol", "email": "carol@example.com", "active": true, "roles": ["editor"], "meta": {"created": "2026-04-21", "lastLogin": "2026-06-29", "loginCount": 58}, "note": "string with braces } { and a quote \" inside — must not break folding"}
+{"id": 4, "broken json on purpose": "this line has no closing brace and should simply not fold"
+{"id": 5, "name": "Dave", "tags": ["x", "y", "z"], "nested": {"a": {"b": {"c": 1}}}}
