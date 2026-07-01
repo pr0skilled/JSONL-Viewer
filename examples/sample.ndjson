@@ -1,0 +1,5 @@
+{"ts": "2026-06-30T08:15:04Z", "level": "INFO", "service": "auth", "event": "login", "user": "alice", "ok": true}
+{"ts": "2026-06-30T08:15:07Z", "level": "WARN", "service": "auth", "event": "login", "user": "bob", "ok": false, "reason": "bad password"}
+{"ts": "2026-06-30T08:16:22Z", "level": "ERROR", "service": "payments", "event": "charge", "orderId": 5567, "amountCents": 1999, "error": {"code": "card_declined", "retryable": false}}
+{"ts": "2026-06-30T08:17:00Z", "level": "INFO", "service": "search", "event": "query", "q": "kotlin jobs", "results": 128, "tookMs": 42, "filters": {"remote": true, "salaryMin": 90000}}
+{"ts": "2026-06-30T08:18:45Z", "level": "DEBUG", "service": "search", "event": "cache", "hit": true, "keys": ["q:kotlin", "geo:nl", "page:1"]}

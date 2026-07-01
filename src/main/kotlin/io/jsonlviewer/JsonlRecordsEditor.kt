@@ -138,7 +138,8 @@ class JsonlRecordsEditor(
 ) : UserDataHolderBase(), FileEditor {
 
     private val pcs = PropertyChangeSupport(this)
-    private val reader = JsonlRecordReader(file)
+    @Volatile private var source: RecordSource? = null
+    @Volatile private var reader: JsonlRecordReader? = null
 
     @Volatile private var index: JsonlLineIndex? = null
     @Volatile private var disposed = false
@@ -192,16 +193,24 @@ class JsonlRecordsEditor(
     private fun startIndexing() {
         object : Task.Backgroundable(project, "Indexing ${file.name}", true) {
             override fun run(indicator: ProgressIndicator) {
-                val idx = try {
-                    file.inputStream.use { JsonlLineIndex.build(it, file.length, indicator) }
+                val src: RecordSource = try {
+                    buildSource(indicator)
                 } catch (e: Exception) {
-                    ApplicationManager.getApplication().invokeLater(
-                        { if (disposed) return@invokeLater; statusLabel.text = "Failed to index: ${e.message}" }, ModalityState.any()
-                    )
+                    showIndexError(e)
+                    return
+                }
+                if (disposed) { src.close(); return }
+                val idx = try {
+                    src.openStream().use { JsonlLineIndex.build(it, src.length, indicator) }
+                } catch (e: Exception) {
+                    src.close()
+                    showIndexError(e)
                     return
                 }
                 ApplicationManager.getApplication().invokeLater({
-                    if (disposed) return@invokeLater
+                    if (disposed) { src.close(); return@invokeLater }
+                    source = src
+                    reader = JsonlRecordReader(src)
                     index = idx
                     baseCount = idx.count
                     currentQuery = null
@@ -213,14 +222,41 @@ class JsonlRecordsEditor(
         }.queue()
     }
 
+    /**
+     * Builds the byte source for [file]. Plain files wrap the VirtualFile
+     * directly; gzip files are streamed once into a temp file (see
+     * [decompressToTempFile]) that the returned [TempFileSource] owns.
+     */
+    private fun buildSource(indicator: ProgressIndicator): RecordSource {
+        if (!JsonlFormat.isGzip(file)) return VirtualFileSource(file)
+        indicator.text = "Decompressing ${file.name}"
+        val temp = file.inputStream.use { decompressToTempFile(it, indicator, file.length) }
+        return TempFileSource(temp, java.nio.file.Files.size(temp))
+    }
+
+    private fun showIndexError(e: Exception) {
+        ApplicationManager.getApplication().invokeLater(
+            { if (!disposed) statusLabel.text = "Failed to index: ${e.message}" },
+            ModalityState.any()
+        )
+    }
+
     private fun runSearch() {
         val idx = index ?: return
         val query = searchField.text.trim()
         if (query.isEmpty()) { clearFilter(); return }
         object : Task.Backgroundable(project, "Searching ${file.name}", true) {
             override fun run(indicator: ProgressIndicator) {
-                val matches = file.inputStream.use {
-                    JsonlSearch.find(it, idx, query, file.length, indicator)
+                val src = source ?: return
+                val matches = try {
+                    src.openStream().use {
+                        JsonlSearch.find(it, idx, query, src.length, indicator)
+                    }
+                } catch (e: com.intellij.openapi.progress.ProcessCanceledException) {
+                    throw e
+                } catch (e: Exception) {
+                    if (!disposed) showIndexError(e)
+                    return
                 }
                 ApplicationManager.getApplication().invokeLater({
                     if (disposed) return@invokeLater
@@ -244,7 +280,8 @@ class JsonlRecordsEditor(
     private fun previewFor(recordIndex: Int): String {
         previewCache[recordIndex]?.let { return it }
         val idx = index ?: return ""
-        val preview = JsonPretty.preview(reader.readRaw(idx, recordIndex))
+        val r = reader ?: return ""
+        val preview = JsonPretty.preview(r.readRaw(idx, recordIndex))
         previewCache[recordIndex] = preview
         return preview
     }
@@ -252,8 +289,9 @@ class JsonlRecordsEditor(
     private fun showSelected() {
         if (disposed) return
         val idx = index ?: return
+        val r = reader ?: return
         val recordIndex = recordList.selectedValue ?: return
-        setDetailText(JsonPretty.format(reader.readRaw(idx, recordIndex)))
+        setDetailText(JsonPretty.format(r.readRaw(idx, recordIndex)))
     }
 
     private fun setDetailText(text: String) {
@@ -331,5 +369,6 @@ class JsonlRecordsEditor(
     override fun dispose() {
         disposed = true
         releaseDetailEditor()
+        source?.close()
     }
 }

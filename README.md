@@ -1,8 +1,8 @@
 # JSONL Viewer
 
-A fast viewer for **JSON Lines** files (`.jsonl`, `.ndjson`, `.jsonlines`, `.ldjson`)
-for any IntelliJ-based IDE — built for files that are far too large for the normal
-editor to open.
+A fast viewer for **JSON Lines** files (`.jsonl`, `.ndjson`, `.jsonlines`, `.ldjson`) — including
+their gzip-compressed `.gz` variants — for any IntelliJ-based IDE, built for files that are far
+too large for the normal editor to open.
 
 Opening a JSONL file adds a **Records** tab that shows the file as a virtualized,
 scrollable list of one-line record previews. Selecting a record pretty-prints it
@@ -20,6 +20,12 @@ arrays.
   matching records with the match highlighted.
 - **Read-only** — never modifies your files; the raw text stays available on a
   second tab.
+- **Reads gzip files** — `.jsonl.gz` (and `.ndjson.gz` etc.) are decompressed to a
+  temporary file on open, then viewed with the same streaming Records tab; the temp
+  file is removed when you close the editor.
+
+> For a `.gz` file the IDE's secondary **Text** tab shows the raw compressed bytes;
+> use the **Records** tab for the decompressed content.
 
 Works in any IntelliJ-based IDE (IntelliJ IDEA, Rider, PyCharm, and others),
 build 242 and newer.
@@ -38,7 +44,10 @@ To try it without installing, run the sandbox IDE:
 ./gradlew runIde
 ```
 
-Open [`examples/sample.jsonl`](examples/sample.jsonl) to see the Records tab in action.
+Open [`examples/sample.jsonl`](examples/sample.jsonl),
+[`examples/sample.ndjson`](examples/sample.ndjson), or the compressed
+[`examples/sample.jsonl.gz`](examples/sample.jsonl.gz) to see the Records tab in
+action.
 
 ## Building
 
@@ -76,7 +85,7 @@ the certificate/key environment variables to publish a signed build.
 src/main/kotlin/io/jsonlviewer/   plugin sources
 src/main/resources/META-INF/      plugin.xml descriptor
 src/test/kotlin/io/jsonlviewer/   unit tests
-examples/                         sample .jsonl file
+examples/                         sample .jsonl / .ndjson / .jsonl.gz files
 ```
 
 ## License

@@ -24,4 +24,14 @@ class JsonlRecordsEditorProviderTest : BasePlatformTestCase() {
             provider.policy
         )
     }
+
+    fun testAcceptsGzippedJsonlByName() {
+        val gz = com.intellij.testFramework.LightVirtualFile("a.jsonl.gz", "")
+        assertTrue(provider.accept(project, gz))
+    }
+
+    fun testRejectsPlainGz() {
+        val gz = com.intellij.testFramework.LightVirtualFile("archive.gz", "")
+        assertFalse(provider.accept(project, gz))
+    }
 }

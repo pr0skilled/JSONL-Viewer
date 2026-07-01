@@ -3,9 +3,9 @@
     <name>JSONL Viewer</name>
     <vendor>JSONL Viewer</vendor>
     <description><![CDATA[
-        <p>A fast viewer for <b>JSON Lines</b> files (<code>.jsonl</code> / <code>.ndjson</code>),
+        <p>A fast viewer for <b>JSON Lines</b> files (<code>.jsonl</code> / <code>.ndjson</code>, plain or <code>.gz</code>),
         built for files that are far too large for the normal editor.</p>
-        <p>Opening a <code>.jsonl</code> file adds a <b>Records</b> tab that shows the file as a
+        <p>Opening a <code>.jsonl</code> (or <code>.jsonl.gz</code>) file adds a <b>Records</b> tab that shows the file as a
         virtualized, scrollable list of one-line record previews. Selecting a record pretty-prints
         it below with JSON syntax highlighting and independently foldable nested objects and arrays.</p>
         <ul>
@@ -18,12 +18,17 @@
                 the matching records with the match highlighted.</li>
             <li><b>Read-only</b> &mdash; never modifies your files; the raw text stays available on a
                 second tab.</li>
+            <li><b>Reads gzip files</b> &mdash; <code>.jsonl.gz</code> / <code>.ndjson.gz</code>
+                are decompressed to a temp file on open and viewed with the same streaming
+                Records tab; the temp file is removed when the editor closes.</li>
         </ul>
         <p>Works in any IntelliJ-based IDE (IntelliJ IDEA, Rider, PyCharm, and others).</p>
     ]]></description>
 
     <change-notes><![CDATA[
         <ul>
+            <li><b>1.1.0</b> &mdash; Open gzip-compressed JSON Lines files
+                (.jsonl.gz / .ndjson.gz / .jsonlines.gz / .ldjson.gz).</li>
             <li><b>1.0.0</b> &mdash; Initial release: streaming <b>Records</b> viewer for
                 .jsonl / .ndjson with a virtualized record list, on-demand pretty-printing with
                 nested folding, and full-text search.</li>
@@ -34,6 +39,14 @@
     <depends>com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <!-- Register gzip-compressed JSON Lines as a known (binary) file type so the
+             IDE does not prompt for a file-type association (plain .gz is unknown in
+             some IDEs, e.g. Rider). The Records view is contributed by the
+             fileEditorProvider below regardless of this type. -->
+        <fileType name="Gzipped JSON Lines"
+                  implementationClass="io.jsonlviewer.JsonlGzFileType"
+                  fieldName="INSTANCE"
+                  patterns="*.jsonl.gz;*.ndjson.gz;*.jsonlines.gz;*.ldjson.gz"/>
         <fileEditorProvider implementation="io.jsonlviewer.JsonlRecordsEditorProvider"/>
     </extensions>
 

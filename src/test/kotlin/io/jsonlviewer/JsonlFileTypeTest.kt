@@ -22,4 +22,16 @@ class JsonlFileTypeTest : BasePlatformTestCase() {
         assertEquals(JsonLinesFileType.INSTANCE, ft)
         assertEquals("JSON-lines", ft.name)
     }
+
+    fun testGzippedJsonlMapsToJsonlGzFileType() {
+        val ft = FileTypeManager.getInstance().getFileTypeByFileName("data.jsonl.gz")
+        assertEquals(JsonlGzFileType, ft)
+        assertEquals("Gzipped JSON Lines", ft.name)
+        assertTrue(ft.isBinary)
+    }
+
+    fun testGzippedNdjsonMapsToJsonlGzFileType() {
+        val ft = FileTypeManager.getInstance().getFileTypeByFileName("logs.ndjson.gz")
+        assertEquals(JsonlGzFileType, ft)
+    }
 }
